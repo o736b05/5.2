@@ -3,7 +3,7 @@ TARGET = main
 CC = gcc
 CFLAGS = -Wall -Iinclude
 
-# определение ос
+# определение ос системы
 ifeq ($(OS),Windows_NT)
     # Windows
     LIB_PREFIX = lib
