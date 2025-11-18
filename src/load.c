@@ -2,169 +2,90 @@
 #include "func.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-#ifdef _WIN32
 #include <windows.h>
-#else
-#include <dlfcn.h>
-#endif
+
 
 void LoadRun(const char* const libName, unsigned int size)
 {
-    // Объявления для обеих платформ
-#ifdef _WIN32
-    HINSTANCE lib;
-#else
-    void* lib;
-#endif
-    void (*func)(int, int*);
+	void* lib;
+	void (*func)(int, int*);
+	lib = LoadLibrary(libName);
+	//загрузка библиотеки в память
+	if (!lib)
+	{
+		printf("Не удалось загрузить библиотеку '%s'\n", libName);
+		return;
+	}
+	printf("Загружена библиотека '%s'\n", libName);
 
-    // Загрузка библиотеки
-#ifdef _WIN32
-    lib = LoadLibrary(libName);
-#else
-    lib = dlopen(libName, RTLD_LAZY);
-#endif
-    if (!lib)
-    {
-#ifdef _WIN32
-        printf("Не удалось загрузить библиотеку '%s'\n", libName);
-#else
-        printf("Не удалось загрузить библиотеку '%s': %s\n", libName, dlerror());
-#endif
-        return;
-    }
-    printf("Библиотека загружена '%s'\n", libName);
+	int* arr = malloc(size * sizeof(int));
+	if (!arr)
+	{
+		printf("Память под массив не выделилась");
+		return;
+	}
 
-    // Выделение памяти для массива
-    int* arr = malloc(size * sizeof(int));
-    if (!arr)
-    {
-        printf("Память под массив не выделена");
-#ifdef _WIN32
-        FreeLibrary(lib);
-#else
-        dlclose(lib);
-#endif
-        return;
-    }
+	func = (void (*)(int, int*))GetProcAddress((HINSTANCE)lib, "FillArrRndmNum");
+	if (func == NULL)
+		printf("Не удалось загрузить функцию 'FillArrRndmNum'\n");
+	else
+		func(size, arr);
 
-    // Получение функции FillArrRndmNum
-#ifdef _WIN32
-    func = (void (*)(int, int*))GetProcAddress(lib, "FillArrRndmNum");
-#else
-    func = (void (*)(int, int*))dlsym(lib, "FillArrRndmNum");
-#endif
-    if (func == NULL)
-    {
-#ifdef _WIN32
-        printf("Не удалось загрузить функцию 'FillArrRndmNum'\n");
-#else
-        printf("Не удалось загрузить функцию 'FillArrRndmNum': %s\n", dlerror());
-#endif
-    }
-    else
-    {
-        func(size, arr);
-    }
+	int exit = 0, choice, res;
+	while (!exit)
+	{
+		puts("\nДействия над массивом:");
+		puts("1. Заполнить случайными числами");
+		puts("2. Заменить числа кратные тройке на единицу");
+		puts("3. Вывести массив");
+		puts("4. Выход");
 
-    int exit = 0, choice, res;
-    while (!exit)
-    {
-        puts("\nВыберите действие:");
-        puts("1. Заполнить случайными числами");
-        puts("2. Заменить числа кратные 3 на 1");
-        puts("3. Вывести массив");
-        puts("4. Назад");
-
-        res = scanf("%d", &choice);
-
+		res = scanf("%d", &choice);
         if (res != 1)
         {
-            puts("Некорректный ввод");
-            for(int c; (c = getchar()) != '\n' && c != EOF;);
+            // Если ввод не соответствует формату %d
+            puts("Ошибка: введите число от 1 до 4");
+            // Полностью очищаем буфер ввода
+            for(int c;(c = getchar()) != '\n' && c != EOF;);
+
             continue;
         }
 
-        switch (choice)
-        {
-        case 1:
-#ifdef _WIN32
-            func = (void (*)(int, int*))GetProcAddress(lib, "FillArrRndmNum");
-#else
-            func = (void (*)(int, int*))dlsym(lib, "FillArrRndmNum");
-#endif
-            if (func == NULL)
-            {
-#ifdef _WIN32
-                printf("Не удалось загрузить функцию 'FillArrRndmNum'\n");
-#else
-                printf("Не удалось загрузить функцию 'FillArrRndmNum': %s\n", dlerror());
-#endif
-            }
-            else
-            {
-                func(size, arr);
-            }
-            break;
+		switch (choice)
+		{
+		case 1:
+			func = (void (*)(int, int*))GetProcAddress((HINSTANCE)lib, "FillArrRndmNum");
+			if (func == NULL)
+				printf("Не удалось загрузить функцию 'FillArrRndmNum'\n");
+			else
+				func(size, arr);
+			break;
+		case 2:
+			func = (void (*)(int, int*))GetProcAddress((HINSTANCE)lib, "ChangeArray");
+			if (func == NULL)
+				printf("Не удалось загрузить функцию 'ChangeArray'\n");
+			else
+				func(size, arr);
+			break;
+		case 3:
+			func = (void (*)(int, int*))GetProcAddress((HINSTANCE)lib, "OutputArray");
+			if (func == NULL)
+				printf("Не удалось загрузить функцию 'OutputArray'\n");
+			else
+				func(size, arr);
+			break;
+		case 4:
+			exit = 1;
+			break;
+		default:
+		    {
+		        while (getchar() != '\n'); // Очистка буфера
+                puts("Неверный ввод");
+		    }
+		}
+	}
 
-        case 2:
-#ifdef _WIN32
-            func = (void (*)(int, int*))GetProcAddress(lib, "ChangeArray");
-#else
-            func = (void (*)(int, int*))dlsym(lib, "ChangeArray");
-#endif
-            if (func == NULL)
-            {
-#ifdef _WIN32
-                printf("Не удалось загрузить функцию 'ChangeArray'\n");
-#else
-                printf("Не удалось загрузить функцию 'ChangeArray': %s\n", dlerror());
-#endif
-            }
-            else
-            {
-                func(size, arr);
-            }
-            break;
-
-        case 3:
-#ifdef _WIN32
-            func = (void (*)(int, int*))GetProcAddress(lib, "OutputArray");
-#else
-            func = (void (*)(int, int*))dlsym(lib, "OutputArray");
-#endif
-            if (func == NULL)
-            {
-#ifdef _WIN32
-                printf("Не удалось загрузить функцию 'OutputArray'\n");
-#else
-                printf("Не удалось загрузить функцию 'OutputArray': %s\n", dlerror());
-#endif
-            }
-            else
-            {
-                func(size, arr);
-            }
-            break;
-
-        case 4:
-            exit = 1;
-            break;
-
-        default:
-            puts("Некорректный ввод");
-            while (getchar() != '\n');
-        }
-    }
-
-    free(arr);
-
-    // Выгрузка библиотеки
-#ifdef _WIN32
-    FreeLibrary(lib);
-#else
-    dlclose(lib);
-#endif
-    printf("\nБиблиотека выгружена '%s'\n", libName);
+	free(arr);
+	FreeLibrary((HINSTANCE)lib); //выгрузка библиотеки
+	printf("\nБиблиотека '%s' выгружена\n", libName);
 }
