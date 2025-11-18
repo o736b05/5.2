@@ -23,7 +23,7 @@ void ChangeArray(int size, int* matrix)
             matrix[i] = 1;
         }
     }
-    puts("\nЭлементы матрицы кратные трём заменены на единицы");
+    puts("\nЭлементы матрицы кратные трём заменены на еденицы");
 }
 
 void OutputArray(int size, int* matrix)

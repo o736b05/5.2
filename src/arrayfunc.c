@@ -23,7 +23,7 @@ void ChangeArray(int size, int* arr)
             arr[i] = 1;
         }
     }
-    puts("\nЭлементы массива кратные трём заменены на единицы");
+    puts("\nЭлементы массива кратные трём заменены на еденицы");
 }
 
 void OutputArray(int size, int* arr)
