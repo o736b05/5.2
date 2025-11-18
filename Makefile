@@ -56,7 +56,7 @@ $(EXE_DIR)$(LIB_PREFIX)arrayfunc$(LIB_EXT): $(OBJ_DIR)arrayfunc.o
 
 $(EXE_DIR)$(LIB_PREFIX)matrixfunc$(LIB_EXT): $(OBJ_DIR)matrixfunc.o
 	@mkdir -p $(EXE_DIR)
-	$(CC) -shared -o $@ $<
+	$(CC) -shared -o $@ $< $(LDFLAGS)
 
 clean:
 	rm -rf $(OBJ_DIR) $(EXE_DIR)
